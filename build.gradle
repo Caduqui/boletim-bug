@@ -9,6 +9,9 @@ repositories {
 
 dependencies {
     implementation 'org.apache.groovy:groovy:4.0.24'
+
+    testImplementation 'org.spockframework:spock-core:2.3-groovy-4.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 application {
@@ -18,6 +21,11 @@ application {
 // Garante que acentos (média, Recuperação) apareçam corretamente
 tasks.withType(GroovyCompile).configureEach {
     groovyOptions.encoding = 'UTF-8'
+}
+
+// O Spock roda sobre a plataforma do JUnit 5
+tasks.named('test') {
+    useJUnitPlatform()
 }
 
 tasks.named('run') {
