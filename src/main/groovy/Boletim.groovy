@@ -14,7 +14,7 @@ def alunos = [
 // 2. Regras da escola
 // ---------------------------------------------------------------
 final MEDIA_APROVACAO = 7.0
-final MEDIA_RECUPERACAO = 6.5
+final MEDIA_RECUPERACAO = 5.0
 
 // ---------------------------------------------------------------
 // 3. Cálculo da média
