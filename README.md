@@ -82,3 +82,48 @@ primeiro acerto.
 - [ ] A média de todos os alunos está igual à esperada
 - [ ] A situação de todos os alunos está igual à esperada
 - [ ] Consigo explicar, com minhas palavras, cada bug que corrigi
+
+## Sobre o bug 1
+
+### O problema
+
+A função `calcularMedia` em `Boletim.groovy` estava com um erro de índice no loop:
+
+```groovy
+def calcularMedia(List notas) {
+    def soma = 0
+    for (int i = 1; i < notas.size(); i++) {  // ERRO: começa em 1
+        soma += notas[i]
+    }
+    return soma / notas.size()
+}
+```
+
+O loop `for` iniciava em `i = 1` em vez de `i = 0`. Como as listas em Groovy (e na maioria das linguagens) são indexadas a partir de **0**, isso fazia com que a **primeira nota de cada aluno fosse ignorada** ao calcular a média.
+
+### Exemplo prático
+
+Para a aluna **Ana**, com notas `[8.0, 7.5, 9.0]`:
+
+- **Antes (bug)**: somava apenas os índices 1 e 2 → `7.5 + 9.0 = 16.5`, depois dividia por 3 → `5.5`
+- **Depois (correto)**: somava todos os índices 0, 1 e 2 → `8.0 + 7.5 + 9.0 = 24.5`, depois dividia por 3 → `8.17`
+
+### A correção
+
+Mudei o início do loop de `i = 1` para `i = 0`:
+
+```groovy
+def calcularMedia(List notas) {
+    def soma = 0
+    for (int i = 0; i < notas.size(); i++) {  // Correto: começa em 0
+        soma += notas[i]
+    }
+    return soma / notas.size()
+}
+```
+
+Agora todas as notas são somadas e a média é calculada corretamente.
+
+### Como identificar
+
+Esse bug não gerava erro de execução — o script rodava normalmente. Mas a saída estava completamente distorcida porque uma nota de cada aluno não entrava no cálculo. Isso mostra que é importante **testar com dados reais** e **comparar com o resultado esperado**, e não confiar apenas em que o programa "roda sem erro".

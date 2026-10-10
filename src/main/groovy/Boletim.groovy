@@ -21,7 +21,7 @@ final MEDIA_RECUPERACAO = 6.5
 // ---------------------------------------------------------------
 def calcularMedia(List notas) {
     def soma = 0
-    for (int i = 1; i < notas.size(); i++) {
+    for (int i = 0; i < notas.size(); i++) {
         soma += notas[i]
     }
     return soma / notas.size()
