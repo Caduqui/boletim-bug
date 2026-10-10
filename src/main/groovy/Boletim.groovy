@@ -31,7 +31,7 @@ def calcularMedia(List notas) {
 // 4. Situação final do aluno
 // ---------------------------------------------------------------
 def situacao(media, mediaAprovacao, mediaRecuperacao) {
-    if (media > mediaAprovacao) {
+    if (media >= mediaAprovacao) {
         return "Aprovado"
     } else if (media >= mediaRecuperacao) {
         return "Recuperação"

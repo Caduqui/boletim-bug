@@ -79,9 +79,9 @@ primeiro acerto.
 
 ### Checklist
 
-- [ ] A média de todos os alunos está igual à esperada
-- [ ] A situação de todos os alunos está igual à esperada
-- [ ] Consigo explicar, com minhas palavras, cada bug que corrigi
+- [x] A média de todos os alunos está igual à esperada
+- [] A situação de todos os alunos está igual à esperada
+- [x] Consigo explicar, com minhas palavras, cada bug que corrigi
 
 ## Sobre o bug 1
 
@@ -127,3 +127,50 @@ Agora todas as notas são somadas e a média é calculada corretamente.
 ### Como identificar
 
 Esse bug não gerava erro de execução — o script rodava normalmente. Mas a saída estava completamente distorcida porque uma nota de cada aluno não entrava no cálculo. Isso mostra que é importante **testar com dados reais** e **comparar com o resultado esperado**, e não confiar apenas em que o programa "roda sem erro".
+
+## Sobre o bug 2
+
+### O problema
+
+A função `situacao` em `Boletim.groovy` estava usando um operador de comparação estrito (`>`) ao verificar se o aluno estava aprovado:
+
+```groovy
+if (media > mediaAprovacao) {
+    return "Aprovado"
+} else if (media >= mediaRecuperacao) {
+    return "Recuperação"
+}
+```
+
+As regras da escola estabelecem que a **média mínima de aprovação é 7.0**. Mas o operador `>` significa "estritamente maior que", o que fazia com que um aluno com **média exatamente 7.0** não fosse considerado aprovado e caísse na condição de Recuperação.
+
+### Exemplo prático
+
+Para um aluno com média **exatamente 7.0** (como a **Carla**):
+
+- **Antes (bug)**: `7.0 > 7.0` é `false` → vai para `else if` → **Recuperação** ❌
+- **Depois (correto)**: `7.0 >= 7.0` é `true` → **Aprovado** ✅
+
+### A correção
+
+Alteramos o operador de `>` (maior que) para `>=` (maior ou igual a):
+
+```groovy
+if (media >= mediaAprovacao) {
+    return "Aprovado"
+} else if (media >= mediaRecuperacao) {
+    return "Recuperação"
+}
+```
+
+Agora a lógica fica:
+
+| Média | Situação |
+|---|---|
+| >= 7.0 | **Aprovado** |
+| >= 6.5 e < 7.0 | **Recuperação** |
+| < 6.5 | **Reprovado** |
+
+### Como identificar
+
+Assim como o bug 1, esse erro não causava nenhuma exceção — o programa rodava perfeitamente e apenas classificava os alunos com média exatamente igual à nota de corte de forma errada. Isso reforça a dica do checklist: **preste atenção nos casos de fronteira**, ou seja, no que deve acontecer com um aluno que tira **exatamente** a nota de corte (neste caso, a Carla com 7.0). Testar apenas com notas "claras" (como 8.0 ou 6.0) não revela esse tipo de problema — é preciso testar os valores limites da regra.
