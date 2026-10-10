@@ -2,12 +2,27 @@ import java.math.RoundingMode
 
 import spock.lang.Specification
 
-// Testes do cálculo da média.
-// Cobrem o bug 1: o loop de calcularMedia começava em 1 e ignorava a primeira nota.
+// Testes do boletim.
+// Bug 1: o loop de calcularMedia começava em 1 e ignorava a primeira nota.
+// Bug 2: situacao usava > em vez de >= e não aprovava quem tirava exatamente a nota de corte.
 class BoletimSpec extends Specification {
+
+    // Regras da escola
+    static final MEDIA_APROVACAO = 7.0
+    static final MEDIA_RECUPERACAO = 5.0
 
     def boletim = new Boletim()
 
+    // Roda o script capturando a saída em vez de mandar para o console
+    def executarBoletim() {
+        def saida = new StringWriter()
+        new Boletim(new Binding(out: new PrintWriter(saida))).run()
+        return saida.toString()
+    }
+
+    // ---------------------------------------------------------------
+    // Bug 1: cálculo da média
+    // ---------------------------------------------------------------
     def "calcularMedia considera a primeira nota"() {
         expect: "se a primeira nota fosse ignorada, a média seria 0"
         boletim.calcularMedia([9.0, 0.0, 0.0]) == 3.0
@@ -26,18 +41,46 @@ class BoletimSpec extends Specification {
     }
 
     def "o boletim impresso mostra a média esperada de cada aluno"() {
-        given: "um script cuja saída é capturada em vez de ir para o console"
-        def saida = new StringWriter()
-        def script = new Boletim(new Binding(out: new PrintWriter(saida)))
-
         when:
-        script.run()
+        def texto = executarBoletim()
 
         then:
-        def texto = saida.toString()
         texto.contains("Ana: média 8.17")
         texto.contains("Bruno: média 6.00")
         texto.contains("Carla: média 7.00")
         texto.contains("Diego: média 7.00")
+    }
+
+    // ---------------------------------------------------------------
+    // Bug 2: aprovação com média igual à nota de corte
+    // ---------------------------------------------------------------
+    def "média #media, em torno da nota de aprovação, resulta em #esperada"() {
+        expect: "com > em vez de >=, a média 7.00 daria Recuperação"
+        boletim.situacao(media, MEDIA_APROVACAO, MEDIA_RECUPERACAO) == esperada
+
+        where:
+        media | esperada
+        6.99  | "Recuperação"
+        7.00  | "Aprovado"
+        7.01  | "Aprovado"
+    }
+
+    def "média calculada de #aluno dá exatamente a nota de corte e resulta em Aprovado"() {
+        expect:
+        boletim.situacao(boletim.calcularMedia(notas), MEDIA_APROVACAO, MEDIA_RECUPERACAO) == "Aprovado"
+
+        where:
+        aluno   | notas
+        "Carla" | [10.0, 4.0, 7.0]
+        "Diego" | [3.0, 9.0, 9.0]
+    }
+
+    def "o boletim impresso mostra como Aprovado quem tirou exatamente a nota de corte"() {
+        when:
+        def texto = executarBoletim()
+
+        then:
+        texto.contains("Carla: média 7.00 - Aprovado")
+        texto.contains("Diego: média 7.00 - Aprovado")
     }
 }
