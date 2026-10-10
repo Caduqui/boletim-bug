@@ -5,6 +5,7 @@ import spock.lang.Specification
 // Testes do boletim.
 // Bug 1: o loop de calcularMedia começava em 1 e ignorava a primeira nota.
 // Bug 2: situacao usava > em vez de >= e não aprovava quem tirava exatamente a nota de corte.
+// Bug 3: a nota de corte da recuperação estava em 6.5, e a regra da escola é 5.0.
 class BoletimSpec extends Specification {
 
     // Regras da escola
@@ -82,5 +83,30 @@ class BoletimSpec extends Specification {
         then:
         texto.contains("Carla: média 7.00 - Aprovado")
         texto.contains("Diego: média 7.00 - Aprovado")
+    }
+
+    // ---------------------------------------------------------------
+    // Bug 3: nota de corte da recuperação
+    // ---------------------------------------------------------------
+    // A constante MEDIA_RECUPERACAO fica dentro do script e não é visível daqui,
+    // então só o teste da saída impressa detecta se o valor dela voltar a ficar errado.
+    def "o boletim impresso mostra como Recuperação quem tem média entre 5.0 e 6.5"() {
+        when:
+        def texto = executarBoletim()
+
+        then: "com a nota de corte em 6.5, o Bruno sairia como Reprovado"
+        texto.contains("Bruno: média 6.00 - Recuperação")
+    }
+
+    def "média #media, com a nota de corte da escola, resulta em #esperada"() {
+        expect:
+        boletim.situacao(media, MEDIA_APROVACAO, MEDIA_RECUPERACAO) == esperada
+
+        where:
+        media | esperada
+        4.99  | "Reprovado"
+        5.00  | "Recuperação"
+        6.00  | "Recuperação"
+        6.50  | "Recuperação"
     }
 }
